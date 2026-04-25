@@ -2,6 +2,8 @@ package com.mctait;
 
 import com.mctait.model.JobPosting;
 import com.mctait.service.JobAggregatorService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +12,8 @@ import java.util.List;
 
 @SpringBootApplication
 public class Main implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     private final JobAggregatorService aggregatorService;
 
@@ -44,20 +48,19 @@ public class Main implements CommandLineRunner {
             }
         }
 
-        System.out.println("\n=== UK Job Scraper ===");
-        System.out.println("Keywords: " + keywords);
-        System.out.println("Location: " + location);
-        System.out.println("Output: " + (outputLocation != null ? outputLocation : "default"));
-        System.out.println("========================\n");
+        log.info("\n=== UK Job Scraper ===");
+        log.info("Keywords: {}", keywords);
+        log.info("Location: {}", location);
+        log.info("Output: {}", outputLocation != null ? outputLocation : "default");
+        log.info("========================\n");
 
         List<JobPosting> jobs = aggregatorService.aggregateJobs(keywords, location, outputLocation);
 
-        System.out.println("\n=== Results (" + jobs.size() + " jobs found) ===");
+        log.info("\n=== Results ({} jobs found) ===", jobs.size());
 
         if (jobs.isEmpty()) {
-            System.out.println("No jobs found. Try different keywords or location.");
+            log.warn("No jobs found. Try different keywords or location.");
         }
-
         System.exit(0);
     }
 }

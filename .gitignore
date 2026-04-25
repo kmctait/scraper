@@ -37,3 +37,6 @@ build/
 ### Config ###
 application.properties
 *.env
+
+### IDE ###
+.idea/
