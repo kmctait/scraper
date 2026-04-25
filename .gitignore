@@ -40,3 +40,7 @@ application.properties
 
 ### IDE ###
 .idea/
+
+### Logs ###
+scraper.log
+logging.file.path_IS_UNDEFINED/
