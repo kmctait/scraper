@@ -33,3 +33,7 @@ bin/
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+
+### Config ###
+application.properties
+*.env
