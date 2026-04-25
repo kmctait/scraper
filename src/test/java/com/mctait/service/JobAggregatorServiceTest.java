@@ -28,7 +28,7 @@ class JobAggregatorServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new JobAggregatorService(adzunaScraper, reedScraper);
+        service = new JobAggregatorService(List.of(adzunaScraper, reedScraper));
     }
 
     @Test
