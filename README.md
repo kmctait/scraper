@@ -12,12 +12,20 @@ writing each source's results to a standalone HTML report.
 
 ## Configuration
 
-Configuration lives in `src/main/resources/application.properties`, which is **not tracked by
-Git** (it holds credentials). Create it from the example:
+Credentials must never be committed. The recommended setup keeps the properties file **outside**
+the repository and loads it on top of the packaged defaults:
 
 ```bash
-cp src/main/resources/application.properties.example src/main/resources/application.properties
+mkdir -p ~/.config/jobscraper
+cp src/main/resources/application.properties.example ~/.config/jobscraper/application.properties
+chmod 600 ~/.config/jobscraper/application.properties
+
+# add to ~/.bashrc so every shell picks it up
+export SPRING_CONFIG_ADDITIONAL_LOCATION=file:$HOME/.config/jobscraper/application.properties
 ```
+
+`src/main/resources/application.properties` is git-ignored, so keeping the file in the tree also
+works, but every build then copies the secrets into `build/resources/main/`.
 
 Every value can also be supplied through an environment variable, which is the preferred way to
 provide secrets in CI or on a shared machine:

@@ -19,15 +19,24 @@ Single-module Gradle project (Java 21, Spring Boot 3.2.0):
 - Config: `src/main/java/com/mctait/config/` (HttpClientConfig, ScrapingProperties)
 - Scrapers: `src/main/java/com/mctait/scraper/` (AbstractJobScraper, AdzunaScraper, ReedScraper)
 - Service: `src/main/java/com/mctait/service/` (JobAggregatorService, AggregationResult)
-- Settings: `src/main/resources/application.properties` (untracked; see `application.properties.example`)
+- Settings: external `application.properties` (git-ignored if kept in-tree; see `application.properties.example`)
 
 ## Configuration
 
-`application.properties` is git-ignored because it holds API keys. Create it with
-`cp src/main/resources/application.properties.example src/main/resources/application.properties`,
-or set `REED_API_KEY`, `ADZUNA_APP_ID` and `ADZUNA_APP_KEY` (plus optional `OUTPUT_BASE_PATH`).
-Output goes to `<output.base-path>/<Source>/*.html` (default `scrapedJobs` relative to the working
-directory).
+`application.properties` holds API keys and must never be committed. Keep it outside the repo and
+point Spring Boot at it:
+
+```bash
+mkdir -p ~/.config/jobscraper
+cp src/main/resources/application.properties.example ~/.config/jobscraper/application.properties
+chmod 600 ~/.config/jobscraper/application.properties
+
+export SPRING_CONFIG_ADDITIONAL_LOCATION=file:$HOME/.config/jobscraper/application.properties
+```
+
+Alternatively set `REED_API_KEY`, `ADZUNA_APP_ID` and `ADZUNA_APP_KEY` (plus optional
+`OUTPUT_BASE_PATH`). Output goes to `<output.base-path>/<Source>/*.html` (default `scrapedJobs`
+relative to the working directory).
 
 ## Application Type
 

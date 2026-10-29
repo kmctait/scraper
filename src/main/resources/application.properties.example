@@ -1,10 +1,14 @@
 # Example configuration for the UK Job Scraper.
 #
-#     cp src/main/resources/application.properties.example src/main/resources/application.properties
+#     mkdir -p ~/.config/jobscraper
+#     cp src/main/resources/application.properties.example ~/.config/jobscraper/application.properties
+#     export SPRING_CONFIG_ADDITIONAL_LOCATION=file:$HOME/.config/jobscraper/application.properties
 #
-# application.properties is git-ignored: never commit real credentials.
-# Secrets can also be supplied through environment variables (recommended), which take
-# precedence over the values in this file:
+# Keeping the file at src/main/resources/application.properties also works (it is git-ignored),
+# but every build then copies it into build/resources/main/.
+#
+# Never commit real credentials. Secrets can also be supplied through environment variables
+# (recommended), which take precedence over the values in this file:
 #
 #     export REED_API_KEY=...
 #     export ADZUNA_APP_ID=...
