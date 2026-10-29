@@ -58,9 +58,7 @@ public interface JobScraper {
 ## Future
 
 - Title/location filter layer and cross-source de-duplication (`ProjectDescription.md`)
-- Sanitise Adzuna `salary_is_predicted` and `contract_time` values
-- Fail-fast validation (`@Validated @NotBlank`) of missing API keys at startup
 - Greenhouse/careers-site scrapers (JSoup or Playwright where HTML parsing is needed)
 - JSON/CSV output alongside HTML
-- CI pipeline (GitHub Actions) with Checkstyle/SpotBugs/Spotless
+- Checkstyle/SpotBugs/Spotless in the CI workflow
 - Optional REST API on top of the aggregator

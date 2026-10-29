@@ -121,6 +121,16 @@ class ReedScraperTest {
     }
 
     @Test
+    void scrape_withBlankApiKey_failsBeforeAnyRequest() {
+        ReedScraper scraper = new ReedScraper(BASE_URL, " ", "/tmp", client, properties);
+
+        ScrapeException error = assertThrows(ScrapeException.class,
+                () -> scraper.scrape("Java", "London", null));
+
+        assertTrue(error.getMessage().contains("REED_API_KEY"), error.getMessage());
+    }
+
+    @Test
     void getSourceName_returnsReed() {
         assertEquals("Reed", scraper().getSourceName());
     }

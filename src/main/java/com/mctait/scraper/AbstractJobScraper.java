@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -47,12 +49,22 @@ public abstract class AbstractJobScraper implements JobScraper {
     protected abstract String buildUrl(String keywords, String location, int page);
 
     /**
+     * Fails fast when required credentials are missing, before any network request is made.
+     * Subclasses override this to report the environment variables the user needs to set.
+     *
+     * @throws ScrapeException when the scraper cannot run with the current configuration
+     */
+    protected void validateConfiguration() {
+    }
+
+    /**
      * Maps a single API result entry onto the application's model.
      */
     protected abstract JobPosting mapJobPosting(JsonObject jobObj);
 
     @Override
     public List<JobPosting> scrape(String keywords, String location, String outputLocation) {
+        validateConfiguration();
         List<JobPosting> jobs = new ArrayList<>();
 
         for (int page = 1; page <= properties.getMaxPages(); page++) {
@@ -273,7 +285,13 @@ public abstract class AbstractJobScraper implements JobScraper {
         html.append("<p class=\"stats\">").append(escapeHtml(keywords)).append(" in ").append(escapeHtml(location)).append(" - ").append(jobs.size()).append(" jobs</p>\n");
         for (JobPosting job : jobs) {
             html.append("<div class=\"job-card\">\n");
-            html.append("<a class=\"job-title\" href=\"").append(escapeHtml(job.getUrl())).append("\">").append(escapeHtml(job.getTitle())).append("</a>\n");
+            String url = safeUrl(job.getUrl());
+            if (url == null) {
+                html.append("<span class=\"job-title\">").append(escapeHtml(job.getTitle())).append("</span>\n");
+            } else {
+                html.append("<a class=\"job-title\" href=\"").append(escapeHtml(url)).append("\">")
+                        .append(escapeHtml(job.getTitle())).append("</a>\n");
+            }
             html.append("<div class=\"company\">").append(escapeHtml(job.getCompanyName())).append("</div>\n");
             html.append("<div class=\"location\">").append(escapeHtml(job.getLocation())).append("</div>\n");
             if (job.getSalary() != null && !job.getSalary().isEmpty()) {
@@ -288,7 +306,34 @@ public abstract class AbstractJobScraper implements JobScraper {
 
     protected String escapeHtml(String str) {
         if (str == null) return "";
-        return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+        return str.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    /**
+     * Returns the URL only when it is an absolute {@code http}/{@code https} URL, so API data
+     * cannot inject {@code javascript:} or {@code data:} links into the generated report.
+     */
+    protected String safeUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return null;
+        }
+        String trimmed = url.trim();
+        try {
+            URI uri = new URI(trimmed);
+            String scheme = uri.getScheme();
+            if (scheme != null
+                    && (scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
+                    && uri.getHost() != null) {
+                return trimmed;
+            }
+        } catch (URISyntaxException e) {
+            log.debug("Ignoring job URL that is not valid: {}", trimmed);
+        }
+        return null;
     }
 
     protected String getStringField(JsonObject obj, String field) {

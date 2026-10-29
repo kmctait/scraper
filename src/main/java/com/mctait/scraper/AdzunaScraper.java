@@ -1,6 +1,7 @@
 package com.mctait.scraper;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mctait.config.ScrapingProperties;
 import com.mctait.model.JobPosting;
 import okhttp3.OkHttpClient;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class AdzunaScraper extends AbstractJobScraper {
@@ -103,14 +106,45 @@ public class AdzunaScraper extends AbstractJobScraper {
         Long maximum = getLongField(jobObj, "salary_max");
         String salary = formatSalaryRange(minimum, maximum);
 
+        List<String> tags = new ArrayList<>();
         if (jobObj.has("contract_time") && !jobObj.get("contract_time").isJsonNull()) {
-            StringBuilder withContract = new StringBuilder(salary);
-            if (!withContract.isEmpty()) withContract.append(" ");
-            withContract.append("(").append(jobObj.get("contract_time").getAsString()).append(")");
-            return withContract.toString();
+            tags.add(formatContractTime(jobObj.get("contract_time").getAsString()));
+        }
+        if (!salary.isEmpty() && getBooleanField(jobObj, "salary_is_predicted")) {
+            tags.add("estimated");
+        }
+        if (tags.isEmpty()) {
+            return salary;
         }
 
-        return salary;
+        StringBuilder withTags = new StringBuilder(salary);
+        if (!withTags.isEmpty()) withTags.append(" ");
+        withTags.append("(").append(String.join(", ", tags)).append(")");
+        return withTags.toString();
+    }
+
+    /** Turns API values such as {@code full_time} into {@code Full time}. */
+    private String formatContractTime(String value) {
+        String words = value.replace('_', ' ').trim();
+        if (words.isEmpty()) {
+            return words;
+        }
+        return Character.toUpperCase(words.charAt(0)) + words.substring(1);
+    }
+
+    /** Adzuna returns this flag as a JSON boolean, number or string depending on the endpoint. */
+    private boolean getBooleanField(JsonObject jobObj, String field) {
+        if (!jobObj.has(field) || jobObj.get(field).isJsonNull()) {
+            return false;
+        }
+        JsonPrimitive value = jobObj.get(field).getAsJsonPrimitive();
+        if (value.isBoolean()) {
+            return value.getAsBoolean();
+        }
+        if (value.isNumber()) {
+            return value.getAsInt() != 0;
+        }
+        return "true".equalsIgnoreCase(value.getAsString());
     }
 
     private Long getLongField(JsonObject jobObj, String field) {
@@ -118,6 +152,14 @@ public class AdzunaScraper extends AbstractJobScraper {
             return jobObj.get(field).getAsLong();
         }
         return null;
+    }
+
+    @Override
+    protected void validateConfiguration() {
+        if (appId == null || appId.isBlank() || appKey == null || appKey.isBlank()) {
+            throw new ScrapeException("ADZUNA_APP_ID / ADZUNA_APP_KEY are not set; export them or "
+                    + "set adzuna.api.app-id / adzuna.api.app-key in your configuration");
+        }
     }
 
     @Override

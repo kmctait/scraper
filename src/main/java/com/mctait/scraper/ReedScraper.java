@@ -90,6 +90,14 @@ public class ReedScraper extends AbstractJobScraper {
     }
 
     @Override
+    protected void validateConfiguration() {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new ScrapeException(
+                    "REED_API_KEY is not set; export it or set reed.api.key in your configuration");
+        }
+    }
+
+    @Override
     public String getSourceName() {
         return "Reed";
     }

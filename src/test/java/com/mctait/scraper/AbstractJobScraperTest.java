@@ -97,6 +97,41 @@ class AbstractJobScraperTest {
     }
 
     @Test
+    void buildHtml_escapesApostrophes() {
+        StubScraper scraper = new StubScraper(tempDir.toString(), properties(3, 50), List.of());
+        JobPosting job = new JobPosting("O'Brien", "Company", "London", "", "",
+                "https://example.com/job/1", "Stub");
+
+        String html = scraper.buildHtml(List.of(job), "Java", "London");
+
+        assertTrue(html.contains("O&#39;Brien"));
+        assertFalse(html.contains("O'Brien"));
+    }
+
+    @Test
+    void buildHtml_linksOnlyHttpUrls() {
+        StubScraper scraper = new StubScraper(tempDir.toString(), properties(3, 50), List.of());
+        JobPosting job = new JobPosting("Data Engineer", "Company", "London", "", "",
+                "javascript:alert(1)", "Stub");
+
+        String html = scraper.buildHtml(List.of(job), "Java", "London");
+
+        assertFalse(html.contains("javascript:"));
+        assertTrue(html.contains("<span class=\"job-title\">Data Engineer</span>"));
+    }
+
+    @Test
+    void buildHtml_linksValidHttpsUrl() {
+        StubScraper scraper = new StubScraper(tempDir.toString(), properties(3, 50), List.of());
+        JobPosting job = new JobPosting("Data Engineer", "Company", "London", "", "",
+                "https://example.com/job/2?a=1&b=2", "Stub");
+
+        String html = scraper.buildHtml(List.of(job), "Java", "London");
+
+        assertTrue(html.contains("href=\"https://example.com/job/2?a=1&amp;b=2\""));
+    }
+
+    @Test
     void parseJobsJson_skipsNullMappings() {
         StubScraper scraper = new StubScraper(tempDir.toString(), properties(3, 50), List.of());
 

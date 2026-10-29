@@ -140,6 +140,67 @@ class AdzunaScraperTest {
     }
 
     @Test
+    void mapJobPosting_formatsContractTimeAndMarksPredictedSalary() {
+        String json = """
+                {
+                    "title": "Data Engineer",
+                    "company": {"display_name": "Data Co"},
+                    "location": {"display_name": "Leeds"},
+                    "salary_min": 40000,
+                    "salary_max": 55000,
+                    "contract_time": "full_time",
+                    "salary_is_predicted": 1,
+                    "description": "Build pipelines",
+                    "redirect_url": "https://example.com/job/2",
+                    "created": "2026-10-01T10:00:00Z"
+                }
+                """;
+
+        JobPosting job = scraper().mapJobPosting(JsonParser.parseString(json).getAsJsonObject());
+
+        assertEquals("Min: £40,000 Max: £55,000 (Full time, estimated)", job.getSalary());
+    }
+
+    @Test
+    void mapJobPosting_whenSalaryIsNotPredicted_addsNoEstimatedTag() {
+        String json = """
+                {
+                    "title": "Data Engineer",
+                    "salary_min": 40000,
+                    "salary_is_predicted": 0
+                }
+                """;
+
+        JobPosting job = scraper().mapJobPosting(JsonParser.parseString(json).getAsJsonObject());
+
+        assertEquals("Min: £40,000", job.getSalary());
+    }
+
+    @Test
+    void mapJobPosting_whenSalaryIsPredictedButMissing_addsNoTag() {
+        String json = """
+                {
+                    "title": "Data Engineer",
+                    "salary_is_predicted": true
+                }
+                """;
+
+        JobPosting job = scraper().mapJobPosting(JsonParser.parseString(json).getAsJsonObject());
+
+        assertEquals("", job.getSalary());
+    }
+
+    @Test
+    void scrape_withBlankCredentials_failsBeforeAnyRequest() {
+        AdzunaScraper scraper = new AdzunaScraper(BASE_URL, "", " ", "/tmp", client, properties);
+
+        ScrapeException error = assertThrows(ScrapeException.class,
+                () -> scraper.scrape("Java", "London", null));
+
+        assertTrue(error.getMessage().contains("ADZUNA_APP_ID"), error.getMessage());
+    }
+
+    @Test
     void getSourceName_returnsAdzuna() {
         assertEquals("Adzuna", scraper().getSourceName());
     }

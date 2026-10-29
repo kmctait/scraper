@@ -110,10 +110,12 @@ java -jar build/libs/scraper-1.0-SNAPSHOT.jar --keywords "Java Developer" --loca
 | Code | Meaning                                                        |
 |------|----------------------------------------------------------------|
 | `0`  | Run completed and every source succeeded (possibly 0 results)  |
-| `1`  | At least one source failed (HTTP error, bad response, write error) |
+| `1`  | At least one source failed (HTTP error, bad response, write error, missing credentials) |
 | `2`  | Invalid command line arguments                                 |
 
-A broken run no longer looks like an empty search, so scripts and CI can detect failures.
+A broken run no longer looks like an empty search, so scripts and CI can detect failures. Missing
+API credentials fail fast — before any request is made — with a message naming the environment
+variable to set, rather than surfacing as a 401.
 
 ## Output
 
