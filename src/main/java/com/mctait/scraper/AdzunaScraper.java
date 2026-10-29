@@ -113,14 +113,7 @@ public class AdzunaScraper extends AbstractJobScraper {
         if (!salary.isEmpty() && getBooleanField(jobObj, "salary_is_predicted")) {
             tags.add("estimated");
         }
-        if (tags.isEmpty()) {
-            return salary;
-        }
-
-        StringBuilder withTags = new StringBuilder(salary);
-        if (!withTags.isEmpty()) withTags.append(" ");
-        withTags.append("(").append(String.join(", ", tags)).append(")");
-        return withTags.toString();
+        return withTags(salary, tags);
     }
 
     /** Turns API values such as {@code full_time} into {@code Full time}. */
@@ -145,13 +138,6 @@ public class AdzunaScraper extends AbstractJobScraper {
             return value.getAsInt() != 0;
         }
         return "true".equalsIgnoreCase(value.getAsString());
-    }
-
-    private Long getLongField(JsonObject jobObj, String field) {
-        if (jobObj.has(field) && !jobObj.get(field).isJsonNull()) {
-            return jobObj.get(field).getAsLong();
-        }
-        return null;
     }
 
     @Override

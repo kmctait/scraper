@@ -223,3 +223,7 @@ example.api.base-url=https://api.example.com
 The suite runs entirely offline: `MainTest` boots the application with the `test` profile, which
 excludes the CLI runner so no live API calls or file writes happen. Test-only settings live in
 `src/test/resources/application-test.properties`.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

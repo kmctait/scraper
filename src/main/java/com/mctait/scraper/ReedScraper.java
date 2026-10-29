@@ -82,13 +82,6 @@ public class ReedScraper extends AbstractJobScraper {
         return formatSalaryRange(minimum, maximum);
     }
 
-    private Long getLongField(JsonObject jobObj, String field) {
-        if (jobObj.has(field) && !jobObj.get(field).isJsonNull()) {
-            return jobObj.get(field).getAsLong();
-        }
-        return null;
-    }
-
     @Override
     protected void validateConfiguration() {
         if (apiKey == null || apiKey.isBlank()) {

@@ -343,6 +343,32 @@ public abstract class AbstractJobScraper implements JobScraper {
         return "";
     }
 
+    /**
+     * Reads an optional numeric field, returning {@code null} when it is absent or JSON null.
+     */
+    protected Long getLongField(JsonObject obj, String field) {
+        if (obj.has(field) && !obj.get(field).isJsonNull()) {
+            return obj.get(field).getAsLong();
+        }
+        return null;
+    }
+
+    /**
+     * Appends parenthesised tags to a value, for example
+     * {@code "Min: £30,000 (Full time, estimated)"}. Returns the value unchanged when there are
+     * no tags.
+     */
+    protected String withTags(String value, List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return value;
+        }
+        StringBuilder result = new StringBuilder(value == null ? "" : value);
+        if (!result.isEmpty()) {
+            result.append(" ");
+        }
+        return result.append("(").append(String.join(", ", tags)).append(")").toString();
+    }
+
     protected String truncate(String value, int maxLength) {
         if (value == null) {
             return "";

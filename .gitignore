@@ -38,6 +38,9 @@ build/
 application.properties
 *.env
 
+### Output ###
+scrapedJobs/
+
 ### IDE ###
 .idea/
 
