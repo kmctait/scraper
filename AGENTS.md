@@ -19,20 +19,21 @@ Single-module Gradle project (Java 21, Spring Boot 3.2.0):
 - Config: `src/main/java/com/mctait/config/` (HttpClientConfig, ScrapingProperties)
 - Scrapers: `src/main/java/com/mctait/scraper/` (AbstractJobScraper, AdzunaScraper, ReedScraper)
 - Service: `src/main/java/com/mctait/service/` (JobAggregatorService, AggregationResult)
-- Settings: external `application.properties` (git-ignored if kept in-tree; see `application.properties.example`)
+- Settings: `src/main/resources/application.properties` (git-ignored; see `application.properties.example`)
 
 ## Configuration
 
-`application.properties` holds API keys and must never be committed. Keep it outside the repo and
-point Spring Boot at it:
+`application.properties` holds API keys and must never be committed. It lives at
+`src/main/resources/application.properties` and is git-ignored:
 
 ```bash
-mkdir -p ~/.config/jobscraper
-cp src/main/resources/application.properties.example ~/.config/jobscraper/application.properties
-chmod 600 ~/.config/jobscraper/application.properties
-
-export SPRING_CONFIG_ADDITIONAL_LOCATION=file:$HOME/.config/jobscraper/application.properties
+cp src/main/resources/application.properties.example src/main/resources/application.properties
+chmod 600 src/main/resources/application.properties
 ```
+
+Keep it out of archives and Docker build contexts, and never use `git add -f`. To keep the file
+outside the repository instead, set
+`SPRING_CONFIG_ADDITIONAL_LOCATION=file:$HOME/.config/jobscraper/application.properties`.
 
 Alternatively set `REED_API_KEY`, `ADZUNA_APP_ID` and `ADZUNA_APP_KEY` (plus optional
 `OUTPUT_BASE_PATH`). Output goes to `<output.base-path>/<Source>/*.html` (default `scrapedJobs`
