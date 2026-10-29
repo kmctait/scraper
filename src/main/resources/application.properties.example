@@ -1,0 +1,33 @@
+# Example configuration for the UK Job Scraper.
+#
+#     cp src/main/resources/application.properties.example src/main/resources/application.properties
+#
+# application.properties is git-ignored: never commit real credentials.
+# Secrets can also be supplied through environment variables (recommended), which take
+# precedence over the values in this file:
+#
+#     export REED_API_KEY=...
+#     export ADZUNA_APP_ID=...
+#     export ADZUNA_APP_KEY=...
+
+# Base directory for the generated HTML files (relative or absolute).
+output.base-path=${OUTPUT_BASE_PATH:scrapedJobs}
+
+# Log file location (the file appender is configured in logback-spring.xml).
+logging.file.path=${SCRAPER_LOG_PATH:/tmp}
+
+# Reed API - https://www.reed.co.uk/developers
+reed.api.key=${REED_API_KEY:}
+reed.api.base-url=${REED_API_BASE_URL:https://www.reed.co.uk/api/1.0/search}
+
+# Adzuna API - https://developer.adzuna.com
+# Note: the base URL must NOT contain a page number; pages are appended per request.
+adzuna.api.base-url=${ADZUNA_API_BASE_URL:https://api.adzuna.com/v1/api/jobs/gb/search}
+adzuna.api.app-id=${ADZUNA_APP_ID:}
+adzuna.api.app-key=${ADZUNA_APP_KEY:}
+
+# Pagination and retry behaviour
+scraping.max-pages=${SCRAPING_MAX_PAGES:3}
+scraping.results-per-page=${SCRAPING_RESULTS_PER_PAGE:50}
+scraping.max-retries=${SCRAPING_MAX_RETRIES:2}
+scraping.retry-backoff=${SCRAPING_RETRY_BACKOFF:500ms}
